@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { PointsToken } from "./PointsToken.sol";
 import { CommunityNFT } from "./CommunityNFT.sol";
+import { CommunityGoods } from "./CommunityGoods.sol";
 /**
  * @title Community
  *
@@ -23,6 +24,7 @@ contract Community is Ownable {
     mapping(address => uint256) public userMap;
     address[] public userList;
     address[] public nftList;
+    address[] public goodsList;
     address public pointToken;
 
     /* ============ External Write Functions ============ */
@@ -48,9 +50,9 @@ contract Community is Ownable {
         return nftList;
     }
 
-
-
-
+    function getGoodsList() external view returns (address[] memory) {
+        return goodsList;
+    }
 
 
      /* ============ Admin Functions ============ */
@@ -79,6 +81,11 @@ contract Community is Ownable {
     function createNFT(string memory _name, string memory _symbol, string memory _baseTokenURI, uint256 _price) external onlyOwner {
         CommunityNFT token = new CommunityNFT(msg.sender, _name, _symbol, _baseTokenURI, pointToken, _price);
         nftList.push(address(token));
+    }
+
+    function createGoods(CommunityGoods.GoodsSetting memory _setting) external onlyOwner {
+        CommunityGoods goods = new CommunityGoods(msg.sender, _setting);
+        goodsList.push(address(goods));
     }
 
     function sendPointToken(address account, uint256 amount) external onlyOwner {

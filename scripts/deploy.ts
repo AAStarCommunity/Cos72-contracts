@@ -60,6 +60,18 @@ async function main() {
     console.log(`${player1.address} balanceOf ${ethers.formatEther(balanceOf)}` );
     const result = await nftContract.getAccountTokenIds(player1.address);
     console.log(`${player1.address} nft  ${result}` );
+
+    tx = await community.createGoods({
+        name: "test",
+        description:"test",
+        logo: "test",
+        price: ethers.parseEther("10"),
+        amount: 10,
+        payToken: pointToken,
+        receiver: player1.address,
+    })
+    await tx.wait();
+    //community.createGoods()
 }
 
 // We recommend this pattern to be able to use async/await everywhere
