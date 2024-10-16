@@ -27,7 +27,10 @@ contract CommunityNFT is
 
     uint256 public price;
  
+    /* ============ Events ============ */
 
+    event TokenMinted(address account, uint256 tokenId);
+    
     constructor(address initialOwner, string memory _name, string memory _symbol, string memory _baseTokenURI, address _payToken, uint256 _price) Ownable(initialOwner) ERC721(_name, _symbol) {
        baseTokenURI = _baseTokenURI; 
        payToken = _payToken;
@@ -45,19 +48,28 @@ contract CommunityNFT is
     function mint(address account, uint256 count)
         public
     {
+        require(count > 0, "Count must be greater than zero");
+
+        uint256 currentTokenId = _tokenIdCounter;
+
         // Batch Mint NFT
         for (uint256 i = 0; i < count; i++) {
-            uint256 tokenId = _tokenIdCounter;
+            uint256 tokenId = currentTokenId;
             _safeMint(account, tokenId);
-            _tokenIdCounter = _tokenIdCounter + 1;
             tokenIds[account].push(tokenId);
+            currentTokenId++;
+        
+            emit TokenMinted(account, tokenId); 
         }
+        _tokenIdCounter = currentTokenId;
 
         ERC20(payToken).transferFrom(
             address(msg.sender),
             address(this),
             price * count
         );
+
+   
     }
 
     /**
