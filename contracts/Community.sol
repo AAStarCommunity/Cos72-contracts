@@ -1,31 +1,40 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { PointsToken } from "./PointsToken.sol";
 import { CommunityNFT } from "./CommunityNFT.sol";
 import { CommunityGoods } from "./CommunityGoods.sol";
+import { CommunityStore } from "./CommunityStore.sol";
 /**
  * @title Community
  *
  */
-contract Community is Ownable {
+contract Community is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     
-    constructor(address initialOwner, string memory _name, string memory _description, string memory _logo) Ownable(initialOwner) {
-        name = _name;
-        description = _description;
-        logo = _logo;
+    struct CommunitySettig {
+        string name;
+        string description;
+        string logo;  
     }
 
-    string public name;
-    string public description;
-    string public logo;
+    CommunitySettig public setting;
     mapping(address => uint256) public userMap;
     address[] public userList;
     address[] public nftList;
-    address[] public goodsList;
+    address[] public storeList;
     address public pointToken;
+
+    function initialize(address initialOwner, CommunitySettig memory _setting) public initializer {
+        __Ownable_init(initialOwner);
+        __UUPSUpgradeable_init();
+        setting = _setting;
+    }
 
     /* ============ External Write Functions ============ */
 
@@ -50,23 +59,27 @@ contract Community is Ownable {
         return nftList;
     }
 
-    function getGoodsList() external view returns (address[] memory) {
-        return goodsList;
+    function getStoreList() external view returns (address[] memory) {
+        return storeList;
     }
 
 
      /* ============ Admin Functions ============ */
 
+    function setSetting(CommunitySettig memory _setting) external onlyOwner {
+        setting = _setting;
+    }
+
     function setName(string memory _name) external onlyOwner {
-        name = _name;
+        setting.name = _name;
     }
 
     function setDescription(string memory _description) external onlyOwner {
-        description = _description;
+        setting.description = _description;
     }
 
     function setLogo(string memory _logo) external onlyOwner {
-        logo = _logo;
+        setting.logo = _logo;
     }
 
     function setPointToken(address _pointToken) external onlyOwner {
@@ -83,12 +96,29 @@ contract Community is Ownable {
         nftList.push(address(token));
     }
 
-    function createGoods(CommunityGoods.GoodsSetting memory _setting) external onlyOwner {
-        CommunityGoods goods = new CommunityGoods(msg.sender, _setting);
-        goodsList.push(address(goods));
+    function createStore(bytes memory _data) external onlyOwner {
+        CommunityStore communityStore = new CommunityStore();
+        address communityStoreAddress = address(communityStore);
+        ERC1967Proxy proxy = new ERC1967Proxy(communityStoreAddress, _data);
+        storeList.push(address(proxy));
     }
 
     function sendPointToken(address account, uint256 amount) external onlyOwner {
         PointsToken(pointToken).mint(account, amount);
     }
+
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        onlyOwner
+        override
+    {}
+
+    function upgrade(address newImplementation) public onlyOwner {
+        upgradeToAndCall(newImplementation, "");
+    }
+
+    function getImplementationAddress() public view returns(address) {
+        return ERC1967Utils.getImplementation();
+    }   
+
 }
