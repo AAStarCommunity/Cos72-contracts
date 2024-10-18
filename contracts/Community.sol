@@ -9,7 +9,6 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { PointsToken } from "./PointsToken.sol";
 import { CommunityNFT } from "./CommunityNFT.sol";
-import { CommunityGoods } from "./CommunityGoods.sol";
 import { CommunityStore } from "./CommunityStore.sol";
 /**
  * @title Community

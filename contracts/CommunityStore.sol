@@ -14,14 +14,14 @@ contract CommunityStore is Initializable, OwnableUpgradeable, UUPSUpgradeable
     struct StoreSettig {
         string name;
         string description;
-        string logo;
+        string image;
     }
 
     struct GoodsSetting {
         uint256 id;
         string name;
         string description;
-        string logo;
+        string[] images;
         address payToken;
         address receiver;
         uint256 amount;
@@ -46,7 +46,7 @@ contract CommunityStore is Initializable, OwnableUpgradeable, UUPSUpgradeable
         __UUPSUpgradeable_init();
         setting.name = _setting.name;
         setting.description = _setting.description;
-        setting.logo = _setting.logo;
+        setting.image = _setting.image;
     }
 
    /* ============ External Getters ============ */
