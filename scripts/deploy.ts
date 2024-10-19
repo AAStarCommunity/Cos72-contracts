@@ -71,6 +71,7 @@ async function main() {
                 name: "goods1",
                 description: "goods1",
                 images: ["goods1", "goods2"],
+                descImages: ["goods1", "goods2"],
                 payToken: pointToken,
                 receiver: admin.address,
                 amount: ethers.MaxUint256,
@@ -83,6 +84,7 @@ async function main() {
                 name: "goods2",
                 description: "goods2",
                 images: ["goods1", "goods2"],
+                descImages: ["goods1", "goods2"],
                 payToken: pointToken,
                 receiver: admin.address,
                 amount: ethers.MaxUint256,
@@ -104,7 +106,7 @@ async function main() {
             await tx.wait()
             console.log("Community Store", address, implAddress, setting, goodsList);
             const purchaseHistory = await communityStore.getPurchaseHistory(admin.address);
-            console.log("purchaseHistory", admin.address, purchaseHistory);
+            console.log("purchase History", admin.address, purchaseHistory);
 
         }
 

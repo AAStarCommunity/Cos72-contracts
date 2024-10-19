@@ -22,6 +22,7 @@ contract CommunityStore is Initializable, OwnableUpgradeable, UUPSUpgradeable
         string name;
         string description;
         string[] images;
+        string[] descImages;
         address payToken;
         address receiver;
         uint256 amount;
