@@ -10,6 +10,12 @@ import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract CommunityStore is Initializable, OwnableUpgradeable, UUPSUpgradeable
 {
+    struct StoreInfo {
+       StoreSettig setting;
+       GoodsSetting[] goodsList;
+       GoodsPurchase [] userPurchaseHistory;
+       GoodsAccountInfo [] goodsAccountInfos;
+    }
 
     struct StoreSettig {
         string name;
@@ -24,6 +30,8 @@ contract CommunityStore is Initializable, OwnableUpgradeable, UUPSUpgradeable
         string[] images;
         string[] descImages;
         address payToken;
+        string payTokenSymbol;
+        uint256 payTokenDecimals;
         address receiver;
         uint256 amount;
         uint256 price;
@@ -37,6 +45,16 @@ contract CommunityStore is Initializable, OwnableUpgradeable, UUPSUpgradeable
         uint256 time;
     }
 
+    struct GoodsAccountInfo {
+        uint256 goodsId;
+        uint256 buyAllowance;
+        // accountInfo.stakingAllowance = ERC20(pool.depositToken).allowance(
+        //         account,
+        //         address(pancakeStaking)
+        //     );
+    }
+
+    
     StoreSettig public setting;
     GoodsSetting [] public goodsList;
    
@@ -56,6 +74,34 @@ contract CommunityStore is Initializable, OwnableUpgradeable, UUPSUpgradeable
     function getGoodsList() external view returns (GoodsSetting[] memory) {
         return goodsList;
     }
+
+    function getStoreInfo(address account) external view returns (StoreInfo memory) {
+        uint256 goodsCount = goodsList.length;
+        GoodsAccountInfo[] memory goodsAccountInfos = new GoodsAccountInfo[](goodsCount);
+        for(uint256 i = 0; i < goodsCount; i++) {
+            GoodsSetting memory goodsSetting = goodsList[i];
+            uint256 buyAllowance = ERC20(goodsSetting.payToken).allowance(account, address(this));
+            GoodsAccountInfo memory goodsAccountInfo = GoodsAccountInfo({
+                goodsId: goodsSetting.id,
+                buyAllowance: buyAllowance
+            });
+            goodsAccountInfos[i] = goodsAccountInfo;
+
+        }
+        StoreInfo memory storeInfo = StoreInfo({
+            setting: setting,
+            goodsList: goodsList,
+            userPurchaseHistory: userPurchaseHistory[account],
+            goodsAccountInfos: goodsAccountInfos
+        });
+        return storeInfo;
+    }
+
+    function getImplementationAddress() public view returns(address) {
+        return ERC1967Utils.getImplementation();
+    }
+
+
 
     function buy(uint256 goodsId, uint256 count)
         public
@@ -83,6 +129,9 @@ contract CommunityStore is Initializable, OwnableUpgradeable, UUPSUpgradeable
 
     function addGoods(GoodsSetting memory _setting) public onlyOwner {
          _setting.id = goodsList.length + 1;
+        ERC20 tokenContract = ERC20(_setting.payToken);
+        _setting.payTokenSymbol = tokenContract.symbol();
+        _setting.payTokenDecimals = tokenContract.decimals();
         goodsList.push(_setting);
     }
 
@@ -99,8 +148,4 @@ contract CommunityStore is Initializable, OwnableUpgradeable, UUPSUpgradeable
     function upgrade(address newImplementation) public onlyOwner {
         upgradeToAndCall(newImplementation, "");
     }
-
-    function getImplementationAddress() public view returns(address) {
-        return ERC1967Utils.getImplementation();
-    }   
 }

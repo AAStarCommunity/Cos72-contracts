@@ -33,7 +33,7 @@ async function main() {
     tx = await communityManager.createCommunity(data2);
     await tx.wait();
     const communityList = await communityManager.getCommunityList();
-
+    
    
     for(let i = 0, l = communityList.length; i < l; i++) {
         const community = Community__factory.connect(communityList[i], admin);
@@ -60,6 +60,7 @@ async function main() {
         const storeList = await community.getStoreList();
         tx = await community.createPointToken("pt", "pt");
         await tx.wait();
+       
         for(let m = 0, n = storeList.length; m < n; m++) {
             const communityStore = CommunityStore__factory.connect(storeList[m], admin);
             const setting = await communityStore.setting();
@@ -73,6 +74,8 @@ async function main() {
                 images: ["goods1", "goods2"],
                 descImages: ["goods1", "goods2"],
                 payToken: pointToken,
+                payTokenDecimals: 0,
+                payTokenSymbol: "",
                 receiver: admin.address,
                 amount: ethers.MaxUint256,
                 price: ethers.parseEther("1"),
@@ -86,13 +89,18 @@ async function main() {
                 images: ["goods1", "goods2"],
                 descImages: ["goods1", "goods2"],
                 payToken: pointToken,
+                payTokenDecimals: 0,
+                payTokenSymbol: "",
                 receiver: admin.address,
                 amount: ethers.MaxUint256,
                 price: ethers.parseEther("100"),
                 enabled: true,
             })
             await tx.wait();
+            let storeInfo = await communityStore.getStoreInfo(admin.address);
+            console.log("storeInfo", storeInfo)
             const goodsList = await communityStore.getGoodsList()
+         
             tx = await ERC20__factory.connect(pointToken, admin).approve(address, ethers.MaxUint256)
 
             await tx.wait()
@@ -107,7 +115,8 @@ async function main() {
             console.log("Community Store", address, implAddress, setting, goodsList);
             const purchaseHistory = await communityStore.getPurchaseHistory(admin.address);
             console.log("purchase History", admin.address, purchaseHistory);
-
+            storeInfo = await communityStore.getStoreInfo(admin.address);
+            console.log("storeInfo", storeInfo)
         }
 
 

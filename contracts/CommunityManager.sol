@@ -16,7 +16,6 @@ contract CommunityManager is Ownable
 
 
     /* ============ External Getters ============ */
-
     function getCommunityList() external view returns ( address[] memory) {
         return communityList;
     }

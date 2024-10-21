@@ -28,6 +28,7 @@ contract Community is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     address[] public nftList;
     address[] public storeList;
     address public pointToken;
+    
 
     function initialize(address initialOwner, CommunitySettig memory _setting) public initializer {
         __Ownable_init(initialOwner);
