@@ -21,6 +21,7 @@ contract CommunityStore is Initializable, OwnableUpgradeable, UUPSUpgradeable
         string name;
         string description;
         string image;
+        address receiver;
     }
 
     struct GoodsSetting {
@@ -32,7 +33,6 @@ contract CommunityStore is Initializable, OwnableUpgradeable, UUPSUpgradeable
         address payToken;
         string payTokenSymbol;
         uint256 payTokenDecimals;
-        address receiver;
         uint256 amount;
         uint256 price;
         bool enabled;
@@ -48,10 +48,6 @@ contract CommunityStore is Initializable, OwnableUpgradeable, UUPSUpgradeable
     struct GoodsAccountInfo {
         uint256 goodsId;
         uint256 buyAllowance;
-        // accountInfo.stakingAllowance = ERC20(pool.depositToken).allowance(
-        //         account,
-        //         address(pancakeStaking)
-        //     );
     }
 
     
@@ -66,6 +62,7 @@ contract CommunityStore is Initializable, OwnableUpgradeable, UUPSUpgradeable
         setting.name = _setting.name;
         setting.description = _setting.description;
         setting.image = _setting.image;
+        setting.receiver = _setting.receiver;
     }
 
    /* ============ External Getters ============ */
@@ -118,7 +115,7 @@ contract CommunityStore is Initializable, OwnableUpgradeable, UUPSUpgradeable
         goodsPurchases.push(goodsPurchase);
         ERC20(goodsSetting.payToken).transferFrom(
             address(msg.sender),
-            address(goodsSetting.receiver),
+            address(setting.receiver),
             goodsSetting.price * count
         );
     }
@@ -137,6 +134,10 @@ contract CommunityStore is Initializable, OwnableUpgradeable, UUPSUpgradeable
 
     function updateGoodsSetting(uint256 goodsId, GoodsSetting memory _setting) public onlyOwner {
         goodsList[goodsId - 1] = _setting;
+    }
+
+    function updateSettng(StoreSettig memory _setting) public onlyOwner {
+        setting = _setting;
     }
 
     function _authorizeUpgrade(address newImplementation)

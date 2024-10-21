@@ -45,12 +45,14 @@ async function main() {
         const data = communityStoreInterface.encodeFunctionData("initialize", [admin.address, {
             name: "storeTest",
             description: "storeTest",
-            image: "storeTest"
+            image: "storeTest",
+            receiver: admin.address,
         }])
         const data2 = communityStoreInterface.encodeFunctionData("initialize", [admin.address, {
             name: "storeTest2",
             description: "storeTest2",
-            image: "storeTest2"
+            image: "storeTest2",
+            receiver: admin.address,
         }])
         tx = await community.createStore(data);
         await tx.wait();
@@ -76,7 +78,7 @@ async function main() {
                 payToken: pointToken,
                 payTokenDecimals: 0,
                 payTokenSymbol: "",
-                receiver: admin.address,
+               
                 amount: ethers.MaxUint256,
                 price: ethers.parseEther("1"),
                 enabled: true,
@@ -91,7 +93,6 @@ async function main() {
                 payToken: pointToken,
                 payTokenDecimals: 0,
                 payTokenSymbol: "",
-                receiver: admin.address,
                 amount: ethers.MaxUint256,
                 price: ethers.parseEther("100"),
                 enabled: true,
