@@ -16,6 +16,16 @@ async function main() {
     const managerAddress =  await CommunityManagerContract.getAddress()
     console.log("CommunityManagerContract deployed to:", managerAddress);
     const communityManager =  CommunityManager__factory.connect(managerAddress, admin);
+   
+
+    let CommunityContractFactory = await ethers.getContractFactory("Community");
+    let CommunityContract = await CommunityContractFactory.deploy();
+    await CommunityContract.waitForDeployment();
+    const communityAddress1 =  await CommunityContract.getAddress()
+
+    CommunityContract = await CommunityContractFactory.deploy();
+    await CommunityContract.waitForDeployment();
+    const communityAddress2 =  await CommunityContract.getAddress()
     const communityInterface =  Community__factory.createInterface()
     const data = communityInterface.encodeFunctionData("initialize", [admin.address, {
         name: "test",
@@ -28,9 +38,9 @@ async function main() {
         logo: "test2"
 
     }])
-    let tx = await communityManager.createCommunity(data);
+    let tx = await communityManager.createCommunity(communityAddress1, data);
     await tx.wait();
-    tx = await communityManager.createCommunity(data2);
+    tx = await communityManager.createCommunity(communityAddress2, data2);
     await tx.wait();
     const communityList = await communityManager.getCommunityList();
     
@@ -41,6 +51,13 @@ async function main() {
         const address = await community.getAddress();
         let implAddress = await community.getImplementationAddress();
         console.log("community", address, implAddress, setting);
+        let CommunityStoreContractFactory = await ethers.getContractFactory("CommunityStore");
+        let CommunityStoreContract = await CommunityStoreContractFactory.deploy();
+        await CommunityStoreContract.waitForDeployment();
+        const communityStoreAddress1 =  await CommunityStoreContract.getAddress();
+        CommunityStoreContract = await CommunityStoreContractFactory.deploy();
+        await CommunityStoreContract.waitForDeployment();
+        const communityStoreAddress2 =  await CommunityStoreContract.getAddress()
         const communityStoreInterface =  CommunityStore__factory.createInterface()
         const data = communityStoreInterface.encodeFunctionData("initialize", [admin.address, {
             name: "storeTest",
@@ -54,9 +71,9 @@ async function main() {
             image: "storeTest2",
             receiver: admin.address,
         }])
-        tx = await community.createStore(data);
+        tx = await community.createStore(communityStoreAddress1, data);
         await tx.wait();
-        tx = await community.createStore(data2);
+        tx = await community.createStore(communityStoreAddress2, data2);
         await tx.wait();
 
         const storeList = await community.getStoreList();

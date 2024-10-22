@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {PointsToken} from "./PointsToken.sol";
 import {CommunityNFT} from "./CommunityNFT.sol";
-import {CommunityStore} from "./CommunityStore.sol";
+
 /**
  * @title Community
  *
@@ -146,9 +146,7 @@ contract Community is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         nftList.push(address(token));
     }
 
-    function createStore(bytes memory _data) external onlyOwner {
-        CommunityStore communityStore = new CommunityStore();
-        address communityStoreAddress = address(communityStore);
+    function createStore(address communityStoreAddress, bytes memory _data) external onlyOwner {
         ERC1967Proxy proxy = new ERC1967Proxy(communityStoreAddress, _data);
         storeList.push(address(proxy));
     }
