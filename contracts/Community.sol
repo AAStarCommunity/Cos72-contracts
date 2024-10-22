@@ -6,28 +6,30 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol";
-import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import { PointsToken } from "./PointsToken.sol";
-import { CommunityNFT } from "./CommunityNFT.sol";
-import { CommunityStore } from "./CommunityStore.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {PointsToken} from "./PointsToken.sol";
+import {CommunityNFT} from "./CommunityNFT.sol";
+import {CommunityStore} from "./CommunityStore.sol";
 /**
  * @title Community
  *
  */
 contract Community is Initializable, OwnableUpgradeable, UUPSUpgradeable {
-    
     struct CommunityInfo {
         CommunitySettig setting;
         address[] userList;
         address[] nftList;
         address[] storeList;
         address pointToken;
+        string pointTokenSymbol;
+        uint256 pointTokenDecimals;
+        uint256 pointTokenBalance;
         bool isAdmin;
     }
     struct CommunitySettig {
         string name;
         string description;
-        string logo;  
+        string logo;
     }
 
     CommunitySettig public setting;
@@ -36,9 +38,11 @@ contract Community is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     address[] public nftList;
     address[] public storeList;
     address public pointToken;
-    
 
-    function initialize(address initialOwner, CommunitySettig memory _setting) public initializer {
+    function initialize(
+        address initialOwner,
+        CommunitySettig memory _setting
+    ) public initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
         setting = _setting;
@@ -55,10 +59,8 @@ contract Community is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         userMap[msg.sender] = 0;
     }
 
-
     /* ============ External Getters ============ */
 
-    
     function getUserList() external view returns (address[] memory) {
         return userList;
     }
@@ -71,20 +73,33 @@ contract Community is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         return storeList;
     }
 
-    function getCommunityInfo(address account)  external view returns (CommunityInfo memory) {
+    function getCommunityInfo(
+        address account
+    ) external view returns (CommunityInfo memory) {
+        string memory pointTokenSymbol = pointToken != address(0)
+            ? ERC20(pointToken).symbol()
+            : "";
+        uint256 pointTokenDecimals = pointToken != address(0)
+            ? ERC20(pointToken).decimals()
+            : 18;
+        uint256 pointTokenBalance = pointToken != address(0)
+            ? ERC20(pointToken).balanceOf(account)
+            : 0;
         CommunityInfo memory info = CommunityInfo({
             setting: setting,
             userList: userList,
             nftList: nftList,
             storeList: storeList,
             pointToken: pointToken,
+            pointTokenSymbol: pointTokenSymbol,
+            pointTokenDecimals: pointTokenDecimals,
+            pointTokenBalance: pointTokenBalance,
             isAdmin: owner() == account
         });
         return info;
     }
 
-
-     /* ============ Admin Functions ============ */
+    /* ============ Admin Functions ============ */
 
     function setSetting(CommunitySettig memory _setting) external onlyOwner {
         setting = _setting;
@@ -106,13 +121,28 @@ contract Community is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         pointToken = _pointToken;
     }
 
-    function createPointToken(string memory _name, string memory _symbol) external onlyOwner {
+    function createPointToken(
+        string memory _name,
+        string memory _symbol
+    ) external onlyOwner {
         ERC20 token = new PointsToken(address(this), _name, _symbol);
         pointToken = address(token);
     }
 
-    function createNFT(string memory _name, string memory _symbol, string memory _baseTokenURI, uint256 _price) external onlyOwner {
-        CommunityNFT token = new CommunityNFT(msg.sender, _name, _symbol, _baseTokenURI, pointToken, _price);
+    function createNFT(
+        string memory _name,
+        string memory _symbol,
+        string memory _baseTokenURI,
+        uint256 _price
+    ) external onlyOwner {
+        CommunityNFT token = new CommunityNFT(
+            msg.sender,
+            _name,
+            _symbol,
+            _baseTokenURI,
+            pointToken,
+            _price
+        );
         nftList.push(address(token));
     }
 
@@ -123,22 +153,22 @@ contract Community is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         storeList.push(address(proxy));
     }
 
-    function sendPointToken(address account, uint256 amount) external onlyOwner {
+    function sendPointToken(
+        address account,
+        uint256 amount
+    ) external onlyOwner {
         PointsToken(pointToken).mint(account, amount);
     }
 
-    function _authorizeUpgrade(address newImplementation)
-        internal
-        onlyOwner
-        override
-    {}
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal override onlyOwner {}
 
     function upgrade(address newImplementation) public onlyOwner {
         upgradeToAndCall(newImplementation, "");
     }
 
-    function getImplementationAddress() public view returns(address) {
+    function getImplementationAddress() public view returns (address) {
         return ERC1967Utils.getImplementation();
-    }   
-
+    }
 }
