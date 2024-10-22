@@ -120,7 +120,8 @@ async function main() {
             console.log("storeInfo", storeInfo)
         }
 
-
+        const communityInfo = await community.getCommunityInfo(admin.address);
+        console.log("communityInfo", communityInfo)
 
         // test update impl
         const contractFactory = await ethers.getContractFactory("Community");

@@ -16,6 +16,14 @@ import { CommunityStore } from "./CommunityStore.sol";
  */
 contract Community is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     
+    struct CommunityInfo {
+        CommunitySettig setting;
+        address[] userList;
+        address[] nftList;
+        address[] storeList;
+        address pointToken;
+        bool isAdmin;
+    }
     struct CommunitySettig {
         string name;
         string description;
@@ -61,6 +69,18 @@ contract Community is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
     function getStoreList() external view returns (address[] memory) {
         return storeList;
+    }
+
+    function getCommunityInfo(address account)  external view returns (CommunityInfo memory) {
+        CommunityInfo memory info = CommunityInfo({
+            setting: setting,
+            userList: userList,
+            nftList: nftList,
+            storeList: storeList,
+            pointToken: pointToken,
+            isAdmin: owner() == account
+        });
+        return info;
     }
 
 

@@ -15,6 +15,7 @@ contract CommunityStore is Initializable, OwnableUpgradeable, UUPSUpgradeable
        GoodsSetting[] goodsList;
        GoodsPurchase [] userPurchaseHistory;
        GoodsAccountInfo [] goodsAccountInfos;
+       bool isAdmin;
     }
 
     struct StoreSettig {
@@ -89,7 +90,8 @@ contract CommunityStore is Initializable, OwnableUpgradeable, UUPSUpgradeable
             setting: setting,
             goodsList: goodsList,
             userPurchaseHistory: userPurchaseHistory[account],
-            goodsAccountInfos: goodsAccountInfos
+            goodsAccountInfos: goodsAccountInfos,
+            isAdmin: owner() == account
         });
         return storeInfo;
     }
