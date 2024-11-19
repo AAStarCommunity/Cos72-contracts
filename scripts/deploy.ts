@@ -135,6 +135,26 @@ async function main() {
             console.log("purchase History", admin.address, purchaseHistory);
             storeInfo = await communityStore.getStoreInfo(admin.address);
             console.log("storeInfo", storeInfo)
+
+
+            const CommunityStoreV2Factory = await ethers.getContractFactory("CommunityStoreV2");
+            const CommunityStoreV2Contract = await CommunityStoreV2Factory.deploy();
+            const newAddress = await CommunityStoreV2Contract.getAddress();
+            const txUpgrade  = await communityStore.upgrade(newAddress)
+            await txUpgrade.wait();
+            storeInfo = await communityStore.getStoreInfo(admin.address);
+            console.log("storeInfo v2", storeInfo)
+
+            const CommunityStoreV3Factory = await ethers.getContractFactory("CommunityStoreV3");
+            const CommunityStoreV3Contract = await CommunityStoreV3Factory.deploy();
+            const CommunityStoreV3newAddress = await CommunityStoreV3Contract.getAddress();
+            const CommunityStoreV3txUpgrade  = await communityStore.upgrade(CommunityStoreV3newAddress)
+            await CommunityStoreV3txUpgrade.wait();
+
+            tx = await communityStore.buy(1, 1)
+            await tx.wait()
+            storeInfo = await communityStore.getStoreInfo(admin.address);
+       //     console.log("storeInfo v3", storeInfo.goodsSalesAmount)
         }
 
         const communityInfo = await community.getCommunityInfo(admin.address);
